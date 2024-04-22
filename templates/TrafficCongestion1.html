@@ -1,0 +1,245 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>城市交通数据</title>
+    <!--设置是否为缩放模式 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--地铁部分 -->
+    <meta name="viewport" content="width=320, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0,shrink-to-fit=no" />
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" type="text/css" href="https://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="{% static 'jQuery/jQuery.3.7.1.min.js' %}"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--echarts JS-->
+    <script src="{% static 'js/echarts.min.js' %}"></script>
+    <!-- 轮播swiper文件 -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/swiper.min.css' %}">
+    <script src="{% static 'js/swiper.min.js' %}"></script>
+    <!--界面样式-->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/visual.css' %}">
+</head>
+<body style="background-color: #777777">
+<div class="container" style="height: 100%;width: 100%">
+    <div class="border-success border-3" style="border: 10px solid #d5720f;height: 49%;
+        border-radius: 15px;margin-top: 7px">
+        <div class="col-md-6" style="height: 100%;border-radius: 5px 0px 0px 5px;
+            border-right: 3px #d5720f solid;background-color: rgba(34,29,150,0.4)">
+            <h1 style="height: 15%;text-align: center;padding-top: 2%;color: white">
+                {{ Congestion1.title_city1 }}</h1>
+            <img style="width: 100%;height: 2px;background-color: #42b983"></img>
+            <div id="chart1" style="height: 85%"></div>
+        </div>
+        <div class="col-md-6" style="height: 100%;border-radius: 0px 5px 5px 0px;
+            border-left: 3px #d5720f solid;background-color: rgba(34,29,150,0.4)">
+            <h1 style="height: 15%;text-align: center;padding-top: 2%;color: white">
+                {{ Congestion1.title_city2 }}</h1>
+            <img style="width: 100%;height: 2px;background-color: #42b983"></img>
+            <div id="chart2" style="height: 85%"></div>
+        </div>
+    </div>
+    <div class="border-success border-3" style="border: 10px solid #d5720f;height: 49%;
+        border-radius: 15px">
+        <div class="col-md-6" style="height: 100%;border-radius: 5px 0px 0px 5px;
+            border-right: 3px #d5720f solid;background-color: rgba(34,29,150,0.4)">
+            <h1 style="height: 15%;text-align: center;padding-top: 2%;color: white">
+                {{ Congestion1.title_city3 }}</h1>
+            <img style="width: 100%;height: 2px;background-color: #42b983"></img>
+            <div id="chart3" style="height: 85%"></div>
+        </div>
+        <div class="col-md-6" style="height: 100%;border-radius: 0px 5px 5px 0px;
+            border-left: 3px #d5720f solid;background-color: rgba(34,29,150,0.4)">
+            <h1 style="height: 15%;text-align: center;padding-top: 2%;color: white">
+                {{ Congestion1.title_city4 }}</h1>
+            <img style="width: 100%;height: 2px;background-color: #42b983"></img>
+            <div id="chart4" style="height: 85%"></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    //表1
+    const data_city = ['北京', '长春', '重庆', '广州', '武汉', '上海', '兰州', '南京', '大连', '哈尔滨']
+    const data_city2 = ['大理', '兰州', '广州', '秦皇岛', '北京', '西安', '长春', '杭州', '乐山', '济南']
+    var myChart1 = echarts.init(document.getElementById("chart1"))
+    option1 = {
+        legend: {
+            data: ['2023Q3高峰拥堵指数'],
+            textStyle: {
+                fontSize: 15,
+                color: '#ffffff'
+            }
+        },
+        tooltip: {},
+        xAxis: {
+                data: data_city,
+                axisLabel: {
+                    font: 15,
+                    color: '#ffffff'
+                }
+            },
+            yAxis: {},
+            series: [
+            {
+              type: 'bar',
+              data: {{ Congestion1.congestion }},
+              name: '2023Q3高峰拥堵指数',
+              color: '#2dd2c4',
+              label: {
+                show: true,
+                position: 'top',
+                textStyle: {
+                  fontSize: 15
+                }
+              }
+            }
+        ]
+    };
+    myChart1.setOption(option1)
+
+    //表2
+    var myChart2 = echarts.init(document.getElementById("chart2"))
+    option2 = {
+        legend: {
+            data: ['2023Q3高峰平均速度(km/h)', '2023Q3高峰信控路口延误(s)'],
+            textStyle: {
+                fontSize: 15,
+                color: '#ffffff'
+            }
+        },
+        tooltip: {},
+        xAxis: {
+            data: data_city,
+            axisLabel: {
+                font: 15,
+                color: '#ffffff'
+            }
+        },
+        yAxis: {},
+        series: [
+            {
+              data: {{ Congestion1.speed }},
+              type: 'line',
+              name: '2023Q3高峰平均速度(km/h)',
+              color: '#29b259',
+              label: {
+                show: true,
+                position: 'bottom',
+                textStyle: {
+                  fontSize: 20,
+                  color: '#05215e'
+                }
+              }
+            },
+            {
+              data: {{ Congestion1.delay }},
+              type: 'line',
+              name: '2023Q3高峰信控路口延误(s)',
+              color: '#c0ad2e',
+              label: {
+                show: true,
+                position: 'bottom',
+                textStyle: {
+                  fontSize: 20,
+                  color: '#ec3575'
+                }
+              }
+            }
+        ]
+    };
+    myChart2.setOption(option2)
+
+    //表3
+    var myChart3 = echarts.init(document.getElementById("chart3"))
+    option3 = {
+        legend: {
+            data: ['2023Q3周末拥堵指数', '2023Q3周末实际速度'],
+            textStyle: {
+                fontSize: 15,
+                color: '#ffffff'
+            }
+        },
+        tooltip: {},
+        xAxis: {
+            data: data_city2,
+            axisLabel: {
+                font: 15,
+                color: '#ffffff'
+            }
+        },
+        yAxis: {},
+        series: [
+            {
+              data: {{ Congestion1.weekend_speed }},
+              type: 'bar',
+              name: '2023Q3周末实际速度',
+              stack: 'x',
+              label: {
+                show: true,
+                position: 'inline',
+                textStyle: {
+                  fontSize: 15
+                }
+              }
+            },
+            {
+              data: {{ Congestion1.weekend_congestion }},
+              type: 'bar',
+              name: '2023Q3周末拥堵指数',
+              stack: 'x',
+              label: {
+                show: true,
+                position: 'top',
+                textStyle: {
+                  fontSize: 15
+                }
+              }
+            }
+        ]
+    };
+    myChart3.setOption(option3)
+
+     //表4
+    var myChart4 = echarts.init(document.getElementById("chart4"))
+    option4 = {
+        legend: {
+            data: ['2023Q3周末实际速度'],
+            textStyle: {
+                fontSize: 15,
+                color: '#ffffff'
+            }
+        },
+        tooltip: {},
+        xAxis: {
+            data: data_city2,
+            axisLabel: {
+                font: 15,
+                color: '#ffffff'
+            }
+        },
+        yAxis: {},
+        series: [
+            {
+              data: {{ Congestion1.weekend_speed }},
+              type: 'line',
+              color: '#35ece6',
+              name: '2023Q3周末实际速度',
+              label: {
+                show: true,
+                position: 'bottom',
+                textStyle: {
+                  fontSize: 20,
+                  color: '#ec7535'
+                }
+              }
+            }
+        ]
+    };
+    myChart4.setOption(option4)
+</script>
+</body>
+</html>

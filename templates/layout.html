@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>样式模板</title>
+</head>
+<body>
+
+{% block js %}
+    <script src="{% static 'bootstrap-template/vendor/jquery-validation/jquery.validate.min.js' %}"></script><!--表单验证-->
+    <script src="{% static 'bootstrap-template/js/front.js' %}"></script>
+{% endblock js %}
+</body>
+</html>

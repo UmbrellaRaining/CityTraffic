@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'jQuery/jQuery.3.7.1.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</head>
+<body>
+
+<div id="m1" onload="initBar()" style="width: 600px; height: 400px"></div>
+
+<script src="{% static 'js/echarts.js' %}"></script>
+<script type="text/javascript">
+    $(function (){
+        initBar()
+    })
+
+    function initBar(){
+        var myCharts = echarts.init(document.getElementById("m1"))
+
+        var option = {
+            title: {
+                text: "柱状图"
+            },
+            tooltip: {},
+            legend: {
+                data: []
+            },
+            xAxis: {
+                data: []
+            },
+            yAxis: {},
+            series: []
+        };
+        $.ajax({
+            url: '/chart/',
+            type: 'get',
+            dataType: "JSON",
+            success: function (res) {
+                if (res.status) {
+                    option.legend.data = res.data.legend
+                    option.xAxis.data = res.data.xAxis
+                    option.series = res.data.series
+
+                    myCharts.setOption(option)
+                }
+            }
+        })
+    }
+    myCharts.setOption(option)
+</script>
+</body>
+</html>

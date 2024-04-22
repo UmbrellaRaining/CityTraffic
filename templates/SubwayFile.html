@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>轨道交通文件选择</title>
+    <link rel="stylesheet" type="text/css" href="https://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="{% static 'jQuery/jQuery.3.7.1.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center; /* 水平居中 */
+            align-items: center; /* 垂直居中 */
+            background-color: #a7afaf;
+        }
+        .container {
+            height: 80%;
+            background-color: #d2cece;
+        }
+        .panel-heading {
+            text-align: center;
+            font-size: 30px;
+        }
+        .panel-body {
+            font-size: 30px;
+            background-color: #d2cece;
+            height: 80%;
+        }
+        .form-group {
+            font-size: 30px;
+        }
+        .btn {
+            display: flex;
+            font-size: 20px;
+            margin-top: 20%;
+            justify-content: center; /* 水平居中 */
+            align-items: center; /* 垂直居中 */
+            width: 100%;
+            height: 50px;
+            background-color: #4CAF50; /* Green */
+            padding: 15px 32px;
+            text-align: center;
+        }
+        .form-group {
+            display: flex;
+            margin-top: 1%;
+            justify-content: center; /* 水平居中 */
+            align-items: center; /* 垂直居中 */
+            width: 100%;
+            height: 50px;
+            padding: 15px 32px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="panel panel-default container">
+        <div class="panel-heading">
+            <span class="glyphicon">文件上传</span>
+        </div>
+        <div class="panel-body">
+            <form class="" method="post" name="data" action="/SubwayFile/" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input type="file" name="file">
+                </div>
+                <button type="submit" class="btn btn-lg btn-success">提交</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

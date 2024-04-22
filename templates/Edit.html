@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>修改用户信息</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'jQuery/jQuery.3.7.1.min.js' %}"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="{% static 'js/bootstrap.js' %}"></script>
+    <style>
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-image: url({% static 'images/future4.jpg' %});
+            background-size: cover;
+            background-position: center;
+            filter: blur(6px); /* 设置模糊度 */
+            z-index: -1; /* 确保模糊层在内容之下 */
+        }
+        .edit {
+            box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+            width: 70%;
+            height: 75%;
+            position: absolute;
+            margin: auto;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+        .table {
+            padding: 20px;
+            font-size: 20px;
+            width: 100%;
+        }
+        .table tr {
+            text-align: center;
+            height: 75px;
+            line-height: 75px;
+        }
+        .table input {
+            width: 70%;
+            height: 35px;
+            display: inline-block;
+        }
+        .table button {
+            width: 20%;
+            height: 35px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<a href="/index/"><button type="button" class="btn btn-secondary">回到首页</button></a>
+    <div class="container-fluid edit">
+        <span class="display" style="display: none">
+            {{ messages }}
+        </span>
+        <form action="/Edit/{{ row.id }}/" method="post" class="form-control">
+            {% csrf_token %}
+            <table class="table table-striped table-info">
+                <tr>
+                    <td>
+                        <span>用户名</span>
+                        <input class="form-control" name="user" type="text" value="{{ row.name }}">
+                        <button class="btn info btn-info" type="submit">确定</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span>密码</span>
+                        <input class="form-control" name="password" type="text" value="{{ row.password }}">
+                        <button class="btn info btn-info" type="submit">确定</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span>邮箱</span>
+                        <input class="form-control" name="email" type="text" value="{{ row.email }}">
+                        <button class="btn info btn-info" type="submit">确定</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span>名言</span>
+                        <input class="form-control" type="text" value="{{ row.say }}">
+                        <button class="btn info btn-info" type="submit">确定</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+        <form action="/ImageFile/" method="post" class="form-control">
+            {% csrf_token %}
+            <table class="table table-striped table-info">
+                <tr>
+                    <td>
+                        <div style="float: left;width: 50%;">
+                            <img class="form-control" type="text" src="{% static 'images/' %}{{ row.logo }}" style="width: 100px;height: 100px;
+                            margin: auto;top: 0;right: 0;bottom: 0;left: 0;">
+                            <a class="file-upload" href="/toImageFile/"><button name="logo" class="btn btn-info" type="file">更换头像</button></a>
+{#                            <div>头像</div>#}
+                        </div>
+                        <div style="float: left;width: 50%">
+                            <img class="form-control" type="text" src="{% static 'images/' %}{{ row.image }}" style="width: 100px;height: 100px;
+                            margin: auto;top: 0;right: 0;bottom: 0;left: 0;">
+                            <a class="file-upload" href="/toImageFile/"><button class="btn btn-info" type="file">更换照片</button></a>
+{#                            <div>照片</div>#}
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>欢迎来到,我的系统</title>
+    <!-- CSS FILES -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,400;0,700;1,200&family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/bootstrap-icons.css' %}" rel="stylesheet">
+    <link href="{% static 'css/tooplate-kool-form-pack.css' %}" rel="stylesheet">
+</head>
+
+<body onload="onPageLoad()">
+    <main>
+
+        <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenuLabel">
+            <div class="offcanvas-header">
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+
+        </div>
+
+
+        <!-- Modal -->
+        <div class="modal fade" id="subscribeModal" tabindex="-1" aria-labelledby="subscribeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <section class="hero-section d-flex justify-content-center align-items-center" id="section_1">
+            <div class="container">
+                <div class="row">
+
+                    <div class="col-lg-6 col-12 mx-auto">
+                        <small>This is my house
+                        <a href="/Login/">Traffic City Analysis System</a></small>
+                        <!-- please set the date time in the init.js file -->
+
+                      <h1 class="text-white mt-2 mb-4 pb-2" style="text-align: center">
+                            Let's Go !
+                        </h1>
+
+                         <ul class="countdown d-flex flex-wrap align-items-center">
+                           <li class="countdown-item d-flex flex-column justify-content-center align-items-center">
+                                <h2 class="countdown-title days">14</h2>
+                                <span class="countdown-text">Days</span>
+                           </li>
+
+                           <li class="countdown-item d-flex flex-column justify-content-center align-items-center">
+                                <h2 class="countdown-title hours">10</h2>
+                                <span class="countdown-text">Hours</span>
+                           </li>
+
+                           <li class="countdown-item d-flex flex-column justify-content-center align-items-center">
+                                <h2 class="countdown-title minutes">15</h2>
+                                <span class="countdown-text">Minutes</span>
+                           </li>
+
+                           <li class="countdown-item d-flex flex-column justify-content-center align-items-center">
+                                <h2 class="countdown-title seconds">34</h2>
+                                <span class="countdown-text">Seconds</span>
+                           </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="video-wrap">
+                <video autoplay="" loop="" muted="" class="custom-video" poster="">
+                    <source src="{% static 'videos/video.mp4' %}" type="video/mp4">
+
+                </video>
+            </div>
+        </section>
+    </main>
+
+    <!-- JAVASCRIPT FILES -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+{#    <script src="{% static 'jQuery/jQuery.3.7.1.min.js' %}"></script>#}
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/countdown.js' %}"></script>
+    <script src="{% static 'js/init.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        $(".countdown").countdown({
+            date: "2024/8/12 18:30:00",
+            format: "on"
+        });
+    });
+    function onPageLoad() {
+      // 监听键盘按下事件
+      document.addEventListener('keydown', function(event) {
+        // 无论按下哪个键，都执行页面跳转
+        window.location.href = '/Login/';
+      });
+      document.addEventListener('click', function(event) {
+        // 无论点击哪里，都执行页面跳转
+        window.location.href = '/Login/';
+      });
+    }
+</script>
+</body>
+</html>

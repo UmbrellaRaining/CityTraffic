@@ -1,0 +1,3515 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>交通数据分析系统</title>
+    <!--设置是否为缩放模式 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--驾驶图-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <!--地铁部分 -->
+    <meta name="viewport" content="width=320, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0,shrink-to-fit=no" />
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" type="text/css" href="https://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+{#    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">#}
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="{% static 'jQuery/jQuery.3.7.1.min.js' %}"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--echarts JS-->
+    <script src="{% static 'js/echarts.min.js' %}"></script>
+    <!-- 轮播swiper文件 -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/swiper.min.css' %}">
+    <script src="{% static 'js/swiper.min.js' %}"></script>
+    <!--界面样式-->
+    <script src="{% static 'js/visual.js' %}"></script>
+    <script src="{% static 'js/china.js' %}"></script>
+    <script src="{% static 'js/chartMap.js' %}"></script>
+    <script src="{% static 'js/love2.js' %}"></script>
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode: "3ceb7146289d7774829329db65651a67",
+        }
+    </script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/visual.css' %}">
+    <style>
+        html,body,#DriverMap {
+            width: 100%;
+            height: 100%;
+        }
+        #panel {
+            position: fixed;
+            background-color: white;
+            max-height: 90%;
+            overflow-y: auto;
+            top: 10px;
+            right: 10px;
+            width: 280px;
+            display: none;
+        }
+        #panel .amap-call {
+            background-color: #009cf9;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+        #panel .amap-lib-driving {
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="ksh">
+    <!-- 加载动画 -->
+	<div id="load">
+		<div class="load_img">
+			<img class="jzxz1" src="{% static 'images/trans1.png' %}">
+			<img class="jzxz2" src="{% static 'images/trans2.png' %}">
+		</div>
+	</div>
+	<div class="head_top row" style="cursor:pointer;left: 0%">
+        <div class="col-lg-2 dropdown" style="width: 80px;height: 20px">
+            <button type="button" class="btn dropdown-toggle btn-info" id="dropdownMenu1"
+                data-toggle="dropdown">{{ user_name }}
+                <span class="caret"></span>
+                <input style="display: none" name="ID" value="{{ info.id }}">
+            </button>
+            <ul class="dropdown-menu list-group-item-info" role="menu" aria-labelledby="dropdownMenu1">
+                <li role="presentation">
+                    <a role="menuitem" tabindex="-1" href="/UserInfo/">用户列表</a>
+                </li>
+                <li role="presentation">
+                    <a role="menuitem" tabindex="-1" href="/DetailInfo/">详细信息</a>
+                </li>
+                <li role="presentation">
+                    <a role="menuitem" tabindex="-1" href="/Edit/{{ info.id }}">编辑信息</a>
+                </li>
+                <li role="presentation" class="divider" style="border: #8d8d8d solid 1px"></li>
+                <li role="presentation">
+                    <a role="menuitem" tabindex="-1" href="/Login/">切换用户</a>
+                </li>
+            </ul>
+        </div>
+		<img class="img-responsive col-lg-8" src="{% static 'images/head_logo2.png' %}">
+        <div class="col-lg-2" style="width: 40px;height: 40px;right: 1%">
+{#            <img alt="logo" src="../static/images/logo{{ ID }}.png" style="width: 40px;height: 40px;border-radius: 50%;">#}
+            <img alt="logo" src="{% static 'images/' %}{{ user_logo }}" style="width: 40px;height: 40px;border-radius: 50%;">
+        </div>
+	</div>
+	<div class="visual">
+		<div class="visual_left dynamic-border">
+			<div class="visual_box" id="displayDiv">
+				<div class="visual_title">
+                    <a href="/toFileSelect/"><span>近十年客流量</span></a>
+					<img src="{% static 'images/icon3.png' %}">
+				</div>
+                <button id="toggleButton" class="button button-3d button-action button-circle button-jumbo" style="border-radius: 100%;
+                        width: 20px;height: 20px"></button>
+				<div class="visual_chart" id="main1">
+
+                </div>
+                <div class="visual_chart" id="main11">
+
+                </div>
+			</div>
+			<div class="visual_box">
+				<div class="visual_title">
+					<a href="/toTrafficToolFile/"><span>交通工具销量</span></a>
+					<img src="{% static 'images/icon3.png' %}">
+				</div>
+				<div class="visual_chart" id="main2">
+
+				</div>
+			</div>
+			<div class="visual_box">
+				<div class="visual_title">
+					<a href="/toSubwayFile/"><span>轨道交通流量</span></a>
+					<img src="{% static 'images/icon3.png' %}">
+				</div>
+                <div class="iframe-container" style="position: relative;
+                    width: 100%;height: 100%;">
+                    <form method="post" action="/Subway/" target="_blank" style="width: 100%;height: 10%;">
+                        {% csrf_token %}
+                        <input type="text" class="form-control input-lg" name="cityName"
+                               placeholder="输入城市查询具体路线图..." style="line-height: 10%;height: 10%;
+                                background-color: #F0FFF0">
+                    </form>
+                    <div class="visual_chart" id="subway" style="width: 100%;height: 90%;">
+
+                    </div>
+                </div>
+			</div>
+		</div>
+		<div class="visual_con">
+            <div class="visual_conTop">
+                <a href="/TrafficCongestion1/"><div id="visual_top" class="visual_conTop_box " style="width: 60%;
+                height: 180px;top: 1%;float: left"></div></a>
+                <a href="/TrafficCongestion2/">
+                    <div class="visual_conTop_box " id="visual_top2" style="width: 40%;
+                    height: 200px;float: left">
+                    </div>
+                </a>
+            </div>
+			<div class="visual_conBot">
+				<img class="visual_conBot_l" src="{% static 'images/icon12.png' %}">
+				<img class="visual_conBot_2" src="{% static 'images/icon13.png' %}">
+				<img class="visual_conBot_3" src="{% static 'images/icon14.png' %}">
+				<img class="visual_conBot_4" src="{% static 'images/icon15.png' %}">
+				<div class="visual_chart_text">
+					<h1>出行服务+大数据</h1>
+					<h2>交通大数据分析平台</h2>
+				</div>
+				<div class="visual_chart" id="main8"></div>
+				<div class="visual_conBot_bot">
+					<div class="visualSssf_left">
+						<h3>国内航空数据</h3>
+						<a style="display:block">航空公司</a>
+						<a class="active" id="main51">国航</a>
+						<a id="main52">东航</a>
+						<a id="main53">南航</a>
+						<a id="main54">吉祥</a>
+						<a id="main55">春秋</a>
+						<a id="main56">厦航</a>
+						<a id="main57">深航</a>
+						<a id="main58">海南航空</a>
+					</div>
+					<div class="visualSssf_right">
+						<div class="visualSssf_right_box" id="main5"></div>
+						<div class="visualSssf_right_box" id="main6"></div>
+						<div class="visualSssf_right_box" id="main7"></div>
+					</div>
+					<div class="clear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visual_right">
+			<div class="visual_box">
+				<div class="visual_title">
+					<span>重庆交通概况</span>
+					<img src="{% static 'images/icon3.png' %}">
+				</div>
+				<div class="swiper-container visual_swiper1 visual_chart">
+					<div class="swiper-wrapper">
+						<div class="swiper-slide"  id="main3"></div>
+						<div class="swiper-slide"  id="main31"></div>
+					</div>
+				</div>
+			</div>
+			<div class="visual_box visualSfzsfl">
+				<div class="visual_title">
+                    <span>天气信息展示</span>
+					<img src="{% static 'images/icon3.png' %}">
+				</div>
+				<div class="visual_chart" id="main9">
+
+				</div>
+                <div class="visual_table" style="left: 15%">
+                    <table id="weather_data">
+                        <thead>
+                            <tr>
+                                <td>指标</td>
+                                <td>数据</td>
+                                <td><button class="btn btn-bd-primary" type="submit" id="weather" value="更新"
+                                    style="padding: 0px 0px;width: 30px;height: 20px;background-color: #087cbb;color: navajowhite">刷新
+                                </button></td>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" style="color: #04f5e0">
+                        </tbody>
+                    </table>
+                </div>
+			</div>
+			<div class="visual_box">
+				<div class="visual_title">
+					<span>汽车驾驶导航</span>
+					<img src="{% static 'images/icon3.png' %}">
+				</div>
+                <div class="visual_chart">
+                    <a href="/DriverMap/" target="_blank">
+                        <div id="DriverMap"></div>
+                        <div id="panel"></div>
+                    </a>
+                </div>
+			</div>
+		</div>
+		<div class="clear"></div>
+	</div>
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=cf4ab5ac5b7352cf23f1974f1d1b699d&plugin=AMap.Driving"></script>
+	<script type="text/javascript">
+		$(function(){
+			var a=$('.visualSssf_left a')
+			for(var i=0;i<a.length;i++){
+				a[i].index=i;
+				a[i].onclick=function(){
+					for(var i=0;i<a.length;i++){
+						a[i].className=''
+						}
+					this.className='active'
+				}
+			}
+
+			var sfzcllH=$('.sfzcll_box').height()
+			var sfzcllHtwo=sfzcllH-2
+			$('.sfzcll_box').css('line-height',sfzcllH+'px')
+			$('.sfzcll_smallBk>div').css('line-height',sfzcllHtwo+'px')
+
+			//删除加载动画
+			$('#load').fadeOut(1000)
+    		setTimeout(function(){
+    			$('#load').remove()
+    		}
+    		,1100);
+		})
+
+	//交通流量
+        var myChart1 = echarts.init(document.getElementById('main1'));
+        var myChart11 = echarts.init(document.getElementById('main11'));
+        var displayDiv = document.getElementById('displayDiv');
+
+        var showDiv1 = true;  // 默认显示子div 1
+        var toggleButton = document.getElementById('toggleButton');
+
+        year = {{ value.year }}
+        data_subway = {{value.data_subway}}
+        data_airplane = {{value.data_airplane}}
+        up_subway_list = {{value.up_subway_list}}
+        up_airplane_list = {{value.up_airplane_list}}
+        option1 = {
+            title: {
+                text: "客流量",
+                textStyle: {
+                    color: '#ffffff'
+                }
+            },
+            tooltip: {},
+            legend: {
+                data: ['铁路', '航空'],
+                textStyle: {
+                    fontSize: 15,
+                    color: '#ffffff'
+                }
+            },
+            xAxis: {
+                data: year
+            },
+            yAxis: {},
+            series: [
+                    {
+                        "name": '铁路',
+                        "type": 'bar',
+                        "data": data_subway
+                    },
+                    {
+                        "name": '航空',
+                        "type": 'bar',
+                        "data": data_airplane
+                    },
+            ],
+            grid: {
+                width: 300,
+                height: 120
+            },
+        };
+        var option11 = {
+            title: {
+                text: "同比增长"
+            },
+            xAxis: {
+                data: year
+            },
+            yAxis: {},
+            series: [
+                {
+                    "stack": 'X',
+                    "type": 'line',
+                    "data": up_subway_list
+                },
+                {
+                    "stack": 'X',
+                    "type": 'line',
+                    "data": up_airplane_list
+                }
+            ],
+            grid: {
+                width: 300,
+                height: 120
+            },
+        };
+        toggleButton.addEventListener('click', function() {
+            if (showDiv1) {
+                myChart1.setOption(option11)
+                showDiv1 = false;
+                $('#toggleButton').css("background", "#7FFFD4")
+            } else {
+                myChart1.setOption(option1)
+                showDiv1 = true;
+                $('#toggleButton').css("background", "#FFDAB9")
+            }
+        });
+	{#var myChart1 = echarts.init(document.getElementById('main1'));#}
+    {#myChart1.setOption(option1);#}
+
+	//交通工具流量
+        month = {{ TrafficValue.month }}
+        data_1 = {{ TrafficValue.data_1 }}
+        data_2 = {{ TrafficValue.data_2 }}
+        data_3 = {{ TrafficValue.data_3 }}
+        option22 = {
+            tooltip: {//鼠标指上时的标线
+                trigger: 'axis',
+                axisPointer: {
+                    lineStyle: {
+                        color: '#fff'
+                    }
+                }
+            },
+            legend: {
+                icon: 'rect',
+                itemWidth: 14,
+                itemHeight: 5,
+                itemGap: 13,
+                data: ['乘用车', '二手车', '进口车'],
+                right: '10px',
+                top: '0px',
+                textStyle: {
+                    fontSize: 12,
+                    color: '#fff'
+                }
+            },
+            grid: {
+                x: 35,
+                y: 25,
+                x2: 8,
+                y2: 25,
+            },
+            xAxis: [{
+                type: 'category',
+                boundaryGap: false,
+                axisLine: {
+                    lineStyle: {
+                        color: '#57617B'
+                    }
+                },
+                axisLabel: {
+                    textStyle: {
+                        color:'#fff',
+                    },
+                },
+                data: month
+            }],
+            yAxis: [{
+                type: 'value',
+                axisTick: {
+                    show: false
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#57617B'
+                    }
+                },
+                axisLabel: {
+                    margin: 10,
+                    textStyle: {
+                        fontSize: 14
+                    },
+                    textStyle: {
+                        color:'#fff',
+                    },
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: '#57617B'
+                    }
+                }
+            }],
+            series: [{
+                name: '乘用车',
+                type: 'line',
+                smooth: true,
+                lineStyle: {
+                    normal: {
+                        width: 2
+                    }
+                },
+                areaStyle: {
+                    normal: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: 'rgba(137, 189, 27, 0.3)'
+                        }, {
+                            offset: 0.8,
+                            color: 'rgba(137, 189, 27, 0)'
+                        }], false),
+                        shadowColor: 'rgba(0, 0, 0, 0.1)',
+                        shadowBlur: 10
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        color: 'rgb(137,189,27)'
+                    }
+                },
+                data: data_1
+            },
+            {
+                name: '二手车',
+                type: 'line',
+                smooth: true,
+                lineStyle: {
+                    normal: {
+                        width: 2
+                    }
+                },
+                areaStyle: {
+                    normal: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: 'rgba(0, 136, 212, 0.3)'
+                        }, {
+                            offset: 0.8,
+                            color: 'rgba(0, 136, 212, 0)'
+                        }], false),
+                        shadowColor: 'rgba(0, 0, 0, 0.1)',
+                        shadowBlur: 10
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        color: 'rgb(0,136,212)'
+                    }
+                },
+                data: data_2
+            },
+            {
+                name: '进口车',
+                type: 'line',
+                smooth: true,
+                lineStyle: {
+                    normal: {
+                        width: 2
+                    }
+                },
+                areaStyle: {
+                    normal: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: 'rgba(219, 50, 51, 0.3)'
+                        }, {
+                            offset: 0.8,
+                            color: 'rgba(219, 50, 51, 0)'
+                        }], false),
+                        shadowColor: 'rgba(0, 0, 0, 0.1)',
+                        shadowBlur: 10
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        color: 'rgb(219,50,51)'
+                    }
+                },
+                data: data_3
+            }]
+        }
+	var myChart2 = echarts.init(document.getElementById('main2'));
+    myChart2.setOption(option22);
+
+    //地铁交通流量
+    var myChart_subway = echarts.init(document.getElementById('subway'));
+    option_subway = {
+        legend: {
+            data: ['运营里程（*10^3公里）', '客运量（亿）', '进站总数（亿）'],
+            textStyle: {
+                fontSize: 15,
+                color: '#ffffff'
+            }
+        },
+        xAxis: {
+            data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+        },
+        yAxis: {},
+        series: [
+            {
+                name: '运营里程（*10^3公里）',
+                data: [9.61, 9.63, 9.65, 9.65, 9.65, 9.73, 9.74, 9.77, 9.86, 9.86, 9.92, 10.17],
+                type: 'line',
+                areaStyle: {}
+            },
+            {
+                name: '客运量（亿）',
+                type: 'scatter',
+                data: [14.7, 21.8, 25.4, 25.3, 24.9, 24.4, 26.6, 27.1, 24.9, 26.6, 25.8, 26.7],
+                symbolSize: function(value) {
+                    return value / 2;
+                }
+            },
+            {
+                name: '进站总数（亿）',
+                type: 'line',
+                step: 'start',
+                color: '#ff45fb',
+                data: [8.9, 13.1, 15.3, 15.2, 15.0, 14.7, 16.0, 16.3, 14.9, 15.9, 15.5, 16.0]
+            },
+        ],
+        grid: {
+                width: 300,
+                height: 100
+            },
+        };
+    myChart_subway.setOption(option_subway)
+
+    //交通拥堵指数
+    var myChart_top = echarts.init(document.getElementById('visual_top'));
+    var myChart_top2 = echarts.init(document.getElementById('visual_top2'));
+    {#var data = [2.085, 1.958, 1.993, 1.874, 1.872];#}
+    for (let i = 0; i < 5; ++i) {
+      data.push(Math.round(Math.random() * 200));
+    }
+
+    var option_top = {
+      xAxis: {
+        max: 'dataMax'
+      },
+      yAxis: {
+        type: 'category',
+        data: ['北京', '重庆', '武汉', '广州', '上海'],
+        inverse: true,
+        animationDuration: 300,
+        animationDurationUpdate: 300,
+        max: 2 // only the largest 3 bars will be displayed
+      },
+      series: [
+        {
+          realtimeSort: true,
+          name: '高峰交通拥堵指数',
+          type: 'bar',
+          color: ['#FFE4B5', '#F0FFF0', '#E6E6FA'],
+          data: [2.085, 1.958, 1.993, 1.874, 1.872],
+          label: {
+            show: true,
+            position: 'right',
+            valueAnimation: true
+          },
+          grid: {
+            width: 200,
+            height: 100
+          },
+        }
+      ],
+      legend: {
+        show: true,
+        textStyle: {
+            fontSize: 15,
+            color: '#ffffff'
+        }
+      },
+      animationDuration: 3000,
+      animationDurationUpdate: 3000,
+      animationEasing: 'linear',
+      animationEasingUpdate: 'linear'
+    };
+
+    function update() {
+      var newData = [...option_top.series[0].data]; // 创建一个新的数组来保存新的数据值
+      for (var i = 0; i < newData.length; ++i) {
+        if (Math.random() > 0.9) {
+          {#newData[i] += Math.round(Math.random() * 2000);#}
+            //保留两位小数的做法
+          newData[i] = Number(newData[i].toFixed(2)) + Math.round(Math.random() * 2000);
+        } else {
+          {#newData[i] += Math.round(Math.random() * 200);#}
+            //保留两位小数的做法
+          newData[i] = Number(newData[i].toFixed(2)) + Math.round(Math.random() * 200);
+        }
+      }
+      option_top.series[0].data = newData; // 将新的数组赋值给option.series[0].data
+      myChart_top.setOption(option_top); // 更新图表数据和排序结果
+    }
+
+    setInterval(function() {
+      update(); // 每3秒更新数据并重新排序
+    }, 1000);
+
+    option_top2 = {
+      title: {
+          text: '重庆高峰拥堵指数',
+          textStyle: {
+              color: "#ffffff"
+          }
+      },
+      xAxis: {
+        data: ['2020/Q1', '2020/Q2', '2020/Q3', '2021/Q1', '2021/Q2', '2021/Q3', '2022/Q1', '2022/Q2', '2022/Q3', '2023/Q1', '2023/Q2', '2023/Q3']
+      },
+      yAxis: {},
+      series: [
+        {
+          data: [1.583, 2.617, 2.504, 1.866, 2.057, 2.088, 1.86, 1.936, 1.837, 1.958, 1.99, 1.966],
+          type: 'line',
+          color: '#35ece6',
+        },
+      ]
+    };
+    myChart_top2.setOption(option_top2)
+
+    //本月发生事件
+	var myChart3 = echarts.init(document.getElementById('main3'));
+    option31 = {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        { offset: 0, color: '#32d458' },
+        { offset: 1, color: '#327dd4' }
+      ]), // 边框颜色
+      textStyle: {
+         color:'#ffffff',
+         fontSize: 12
+      },
+      tooltip: {
+          trigger: 'item',
+          style: {
+            fontSize: 14, // 设置字体大小为14px
+            fontWeight: 'bold', // 设置字体加粗
+            fontFamily: 'Arial', // 设置字体为Arial
+          },
+          position: function (pt) {
+            // 根据需要调整tooltip的位置
+            return [pt[0], pt[1] - 100]; // x坐标不变，y坐标向下偏移100px
+        }
+      },
+      title: { show: false },
+      legend: {
+          show: true,
+          data: ['重庆晚六拥堵指数'],
+          orient: 'vertical',
+          left: 'left', // 将图例定位到左边
+          textStyle: {
+              color: '#ffffff',
+          }
+      },
+      polar: [
+        {
+          splitNumber: 2,
+          center: ['50%', '50%'], // 图的位置
+          indicator: [
+            { text: '渝中区', max: 3 },
+            { text: '江北区', max: 3 },
+            { text: '南岸区', max: 3 },
+            { text: '巴南区', max: 3 },
+            { text: '九龙坡区', max: 3 },
+            { text: '渝北区', max: 3 }
+          ],
+          radius: 80,
+          axisLine: {
+            // 坐标轴线
+            show: true, // 默认显示，属性show控制显示与否
+            lineStyle: {
+              type: 'dashed' //虚线
+            }
+          },
+          axisLabel: {
+            // 坐标轴文本标签，详见axis.axisLabel
+            show: false,
+          },
+          splitArea: {
+            show: true,
+            areaStyle: {
+              color: ['rgba(213,120,120,0)'] // 图表背景网格的颜色
+            }
+          },
+          splitLine: {
+            show: true,
+            lineStyle: {
+              width: 1,
+            }
+          }
+        }
+      ],
+      series: [
+        {
+          type: 'radar',
+          lineStyle: {
+            width: 1 // 图表中各个图区域的边框线颜色
+          },
+          symbol: 'none', // 去除拐点
+          areaStyle: {},
+          data: [
+            {
+              value: [2.57, 2.14, 1.83, 1.77, 1.87, 2.08],
+              name: '重庆晚六拥堵指数'
+            }
+          ]
+        }
+      ],
+    }
+    myChart3.setOption(option31)
+    var myChart31 = echarts.init(document.getElementById('main31'));
+    option32 = {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        { offset: 0, color: '#d43232' },
+        { offset: 1, color: '#ce532d' }
+      ]), // 边框颜色
+      textStyle: {
+         color:'#ffffff',
+         fontSize: 12
+      },
+      tooltip: {
+          trigger: 'item',
+          style: {
+            fontSize: 14, // 设置字体大小为14px
+            fontWeight: 'bold', // 设置字体加粗
+            fontFamily: 'Arial', // 设置字体为Arial
+          },
+          position: function (pt) {
+            // 根据需要调整tooltip的位置
+            return [pt[0], pt[1] - 100]; // x坐标不变，y坐标向下偏移100px
+        }
+      },
+      title: { show: false },
+      legend: {
+          show: true,
+          data: ['旅行速度'],
+          orient: 'vertical',
+          left: 'left', // 将图例定位到左边
+          textStyle: {
+              color: '#ffffff',
+          }
+      },
+      polar: [
+        {
+          splitNumber: 2,
+          center: ['50%', '50%'], // 图的位置
+          indicator: [
+            { text: '渝中区', max: 30 },
+            { text: '江北区', max: 30 },
+            { text: '南岸区', max: 30 },
+            { text: '巴南区', max: 30 },
+            { text: '九龙坡区', max: 30 },
+            { text: '渝北区', max: 30 }
+          ],
+          radius: 80,
+          axisLine: {
+            // 坐标轴线
+            show: true, // 默认显示，属性show控制显示与否
+            lineStyle: {
+              type: 'dashed' //虚线
+            }
+          },
+          axisLabel: {
+            // 坐标轴文本标签，详见axis.axisLabel
+            show: false,
+          },
+          splitArea: {
+            show: true,
+            areaStyle: {
+              color: ['rgba(213,120,120,0)'], // 图表背景网格的颜色
+            }
+          },
+          splitLine: {
+            show: true,
+            lineStyle: {
+              width: 1,
+            }
+          }
+        }
+      ],
+      series: [
+        {
+          type: 'radar',
+          lineStyle: {
+            width: 1 // 图表中各个图区域的边框线颜色
+          },
+          symbol: 'none', // 去除拐点
+          areaStyle: {},
+          data: [
+            {
+              value: [20.73, 23.74, 27.36, 27.08, 25.79, 25.63],
+              name: '旅行速度'
+            }
+          ]
+        }
+      ],
+    }
+    myChart31.setOption(option32)
+    {#myChart31.setOption(option31);#}
+    var mySwiper1 = new Swiper('.visual_swiper1', {
+		autoplay: true,//可选选项，自动滑动
+		speed:800,//可选选项，滑动速度
+		autoplay: {
+		    delay: 5000,//1秒切换一次
+		  },
+	})
+
+    //国内航空数据
+	var myChart5 = echarts.init(document.getElementById('main5'));
+    var myChart6 = echarts.init(document.getElementById('main6'));
+    var myChart7 = echarts.init(document.getElementById('main7'));
+    option51 = {
+        title: {
+          text: '客座率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '9%',
+          top: '10%',
+        },
+        legend: {
+            data: ['客座率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '客座率/%',
+                value: {{ flight_data.CA_ke }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#94d0ca',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#3198ee',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+               show: true,  // 控制是否显示标签
+               position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option61 = {
+        title: {
+          text: '正常率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '16%',
+          top: '10%',
+        },
+        legend: {
+            data: ['正常率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '正常率/%',
+                value: {{ flight_data.CA_correct }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#98d094',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#54ee31',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option71 = {
+        title: {
+          text: '飞机利用率h',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '6%',
+          top: '10%',
+        },
+        legend: {
+            data: ['飞机利用率h']
+        },
+        angleAxis: {
+          max: 10, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '飞机利用率h',
+                value: {{ flight_data.CA_use }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#d0c894',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#eeb231',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option52 = {
+        title: {
+          text: '客座率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '9%',
+          top: '10%',
+        },
+        legend: {
+            data: ['客座率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '客座率/%',
+                value: {{ flight_data.MU_ke }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#94d0ca',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#3198ee',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+               show: true,  // 控制是否显示标签
+               position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option62 = {
+        title: {
+          text: '正常率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '16%',
+          top: '10%',
+        },
+        legend: {
+            data: ['正常率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '正常率/%',
+                value: {{ flight_data.MU_correct }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#98d094',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#54ee31',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option72 = {
+        title: {
+          text: '飞机利用率h',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '6%',
+          top: '10%',
+        },
+        legend: {
+            data: ['飞机利用率h']
+        },
+        angleAxis: {
+          max: 10, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '飞机利用率h',
+                value: {{ flight_data.MU_use }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#d0c894',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#eeb231',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option53 = {
+        title: {
+          text: '客座率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '9%',
+          top: '10%',
+        },
+        legend: {
+            data: ['客座率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '客座率/%',
+                value: {{ flight_data.CZ_ke }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#94d0ca',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#3198ee',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+               show: true,  // 控制是否显示标签
+               position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option63 = {
+        title: {
+          text: '正常率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '16%',
+          top: '10%',
+        },
+        legend: {
+            data: ['正常率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '正常率/%',
+                value: {{ flight_data.CZ_correct }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#98d094',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#54ee31',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option73 = {
+        title: {
+          text: '飞机利用率h',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '6%',
+          top: '10%',
+        },
+        legend: {
+            data: ['飞机利用率h']
+        },
+        angleAxis: {
+          max: 10, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '飞机利用率h',
+                value: {{ flight_data.CZ_use }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#d0c894',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#eeb231',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option54 = {
+        title: {
+          text: '客座率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '9%',
+          top: '10%',
+        },
+        legend: {
+            data: ['客座率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '客座率/%',
+                value: {{ flight_data.HO_ke }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#94d0ca',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#3198ee',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+               show: true,  // 控制是否显示标签
+               position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option64 = {
+        title: {
+          text: '正常率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '16%',
+          top: '10%',
+        },
+        legend: {
+            data: ['正常率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '正常率/%',
+                value: {{ flight_data.HO_correct }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#98d094',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#54ee31',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option74 = {
+        title: {
+          text: '飞机利用率h',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '6%',
+          top: '10%',
+        },
+        legend: {
+            data: ['飞机利用率h']
+        },
+        angleAxis: {
+          max: 10, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '飞机利用率h',
+                value: {{ flight_data.HO_use }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#d0c894',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#eeb231',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option55 = {
+        title: {
+          text: '客座率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '9%',
+          top: '10%',
+        },
+        legend: {
+            data: ['客座率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '客座率/%',
+                value: {{ flight_data.C9_ke }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#94d0ca',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#3198ee',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+               show: true,  // 控制是否显示标签
+               position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option65 = {
+        title: {
+          text: '正常率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '16%',
+          top: '10%',
+        },
+        legend: {
+            data: ['正常率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '正常率/%',
+                value: {{ flight_data.C9_correct }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#98d094',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#54ee31',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option75 = {
+        title: {
+          text: '飞机利用率h',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '6%',
+          top: '10%',
+        },
+        legend: {
+            data: ['飞机利用率h']
+        },
+        angleAxis: {
+          max: 10, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '飞机利用率h',
+                value: {{ flight_data.C9_use }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#d0c894',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#eeb231',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option56 = {
+        title: {
+          text: '客座率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '9%',
+          top: '10%',
+        },
+        legend: {
+            data: ['客座率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '客座率/%',
+                value: {{ flight_data.MF_ke }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#94d0ca',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#3198ee',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+               show: true,  // 控制是否显示标签
+               position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option66 = {
+        title: {
+          text: '正常率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '16%',
+          top: '10%',
+        },
+        legend: {
+            data: ['正常率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '正常率/%',
+                value: {{ flight_data.MF_correct }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#98d094',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#54ee31',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option76 = {
+        title: {
+          text: '飞机利用率h',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '6%',
+          top: '10%',
+        },
+        legend: {
+            data: ['飞机利用率h']
+        },
+        angleAxis: {
+          max: 10, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '飞机利用率h',
+                value: {{ flight_data.MF_use }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#d0c894',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#eeb231',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option57 = {
+        title: {
+          text: '客座率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '9%',
+          top: '10%',
+        },
+        legend: {
+            data: ['客座率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '客座率/%',
+                value: {{ flight_data.ZH_ke }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#94d0ca',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#3198ee',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+               show: true,  // 控制是否显示标签
+               position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option67 = {
+        title: {
+          text: '正常率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '16%',
+          top: '10%',
+        },
+        legend: {
+            data: ['正常率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '正常率/%',
+                value: {{ flight_data.ZH_correct }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#98d094',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#54ee31',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option77 = {
+        title: {
+          text: '飞机利用率h',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '6%',
+          top: '10%',
+        },
+        legend: {
+            data: ['飞机利用率h']
+        },
+        angleAxis: {
+          max: 10, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '飞机利用率h',
+                value: {{ flight_data.ZH_use }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#d0c894',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#eeb231',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option58 = {
+        title: {
+          text: '客座率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '9%',
+          top: '10%',
+        },
+        legend: {
+            data: ['客座率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '客座率/%',
+                value: {{ flight_data.HU_ke }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#94d0ca',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#3198ee',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+               show: true,  // 控制是否显示标签
+               position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option68 = {
+        title: {
+          text: '正常率/%',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '16%',
+          top: '10%',
+        },
+        legend: {
+            data: ['正常率/%']
+        },
+        angleAxis: {
+          max: 100, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '正常率/%',
+                value: {{ flight_data.HU_correct }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#98d094',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#54ee31',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+    option78 = {
+        title: {
+          text: '飞机利用率h',
+          textStyle: {
+            color: '#f85e5e',
+            fontSize: 16,
+          },
+          left: '6%',
+          top: '10%',
+        },
+        legend: {
+            data: ['飞机利用率h']
+        },
+        angleAxis: {
+          max: 10, // 满分
+          clockwise: true, // 逆时针
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        radiusAxis: {
+          type: 'category',
+          // 隐藏刻度线
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        polar: {
+          center: ['40%', '50%'],
+          radius: ['30%', '80%'], //图形大小
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [
+              {
+                name: '飞机利用率h',
+                value: {{ flight_data.HU_use }},
+                itemStyle: {
+                  normal: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                      {
+                        offset: 0,
+                        color: '#d0c894',
+                      },
+
+                      {
+                        offset: 1,
+                        color: '#eeb231',
+                      },
+                    ]),
+                  },
+                },
+              },
+            ],
+            coordinateSystem: 'polar', // 变成极坐标系
+            roundCap: true, // 两端变成 圆角
+            barWidth: 25, // 柱子粗细
+            barGap: '-100%', // 两环重叠
+            z: 99, // 有数值的环置顶
+            label: {  // 添加 label 字段以显示数值
+                show: true,  // 控制是否显示标签
+                position: 'inside'  // 控制标签的位置，这里选择内部位置显示数值
+            }
+          },
+          {
+            // 灰色环
+            type: 'bar',
+            data: [
+              {
+                value: 100,
+                itemStyle: {
+                  color: '#E9F5FF',
+                  shadowColor: 'rgba(1, 0, 0, 0.2)',
+                  shadowBlur: 5,
+                  shadowOffsetY: 2,
+                },
+              },
+            ],
+            coordinateSystem: 'polar',
+            roundCap: true,
+            barWidth: 20,
+            barGap: '-100%', // 两环重叠
+          },
+        ],
+      }
+        document.getElementById('main51').addEventListener('click', function() {
+            myChart5.setOption(option51)
+            myChart6.setOption(option61)
+            myChart7.setOption(option71)
+        });
+        document.getElementById('main52').addEventListener('click', function() {
+            myChart5.setOption(option52)
+            myChart6.setOption(option62)
+            myChart7.setOption(option72)
+        });
+        document.getElementById('main53').addEventListener('click', function() {
+            myChart5.setOption(option53)
+            myChart6.setOption(option63)
+            myChart7.setOption(option73)
+        });
+        document.getElementById('main54').addEventListener('click', function() {
+            myChart5.setOption(option54)
+            myChart6.setOption(option64)
+            myChart7.setOption(option74)
+        });
+        document.getElementById('main55').addEventListener('click', function() {
+            myChart5.setOption(option55)
+            myChart6.setOption(option65)
+            myChart7.setOption(option75)
+        });
+        document.getElementById('main56').addEventListener('click', function() {
+            myChart5.setOption(option56)
+            myChart6.setOption(option66)
+            myChart7.setOption(option76)
+        });
+        document.getElementById('main57').addEventListener('click', function() {
+            myChart5.setOption(option57)
+            myChart6.setOption(option67)
+            myChart7.setOption(option77)
+        });
+        document.getElementById('main58').addEventListener('click', function() {
+            myChart5.setOption(option58)
+            myChart6.setOption(option68)
+            myChart7.setOption(option78)
+        });
+
+    //天气
+    $(document).ready(function () {
+        $("#weather").click(function () {
+            AMap.plugin('AMap.Geolocation', function() {
+                    var geolocation = new AMap.Geolocation({
+                    enableHighAccuracy: true, // 是否使用高精度定位，默认：true
+                    timeout: 10000, // 设置定位超时时间，默认：无穷大
+                    offset: [10, 20],  // 定位按钮的停靠位置的偏移量
+                    zoomToAccuracy: true,  //  定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
+                    position: 'RB' //  定位按钮的排放位置,  RB表示右下
+                })
+
+                geolocation.getCurrentPosition(function(status,result){
+                    if(status=='complete'){
+                        onComplete(result)
+                    }else{
+                        onError(result)
+                    }
+                });
+
+                function onComplete (data) {
+                // data是具体的定位信息
+                    var longitude = data.position.lng
+                    var latitude = data.position.lat
+                    console.log(longitude, latitude)
+
+                    // 发送Ajax请求
+                    $.ajax({
+                        url: "/weather/",  // 后端处理数据的URL
+                        type: "GET",
+                        data: {"longitude": longitude, "latitude": latitude},
+                        success: function (data) {
+                            // 将返回的数据显示在页面上
+                            $("#weather_data tbody").empty();
+
+                            // 动态添加表格内容
+                            for (var key in data.info_display) {
+                                var row = "<tr><td>" + key + "</td><td>" + data.info_display[key] + "</td></tr>";
+                                $("#weather_data tbody").append(row);
+                            }
+                        },
+                        error: function (error) {
+                            console.log("Error:", error);
+                        }
+                    });
+                }
+
+                function onError (data) {
+                    // 定位出错
+                    console.log('定位出错')
+                }
+            })
+        });
+    });
+    var tableVisible = false;
+
+    document.getElementById('weather').addEventListener('click', function() {
+      var table = document.getElementById('weather_data');
+      var tableBody = document.getElementById('tableBody');
+
+      // Clear existing table content
+      tableBody.innerHTML = '';
+
+      if (!tableVisible) {
+        table.style.display = 'table';
+        setTimeout(function() {
+          table.style.opacity = 1;
+        }, 10); // Delay to ensure display and opacity are set before the transition
+      }
+      tableVisible = true;
+    });
+
+    //中间地图
+	var myChart8 = echarts.init(document.getElementById('main8'));
+    myChart8.setOption(option8);
+    //天气部分-全国城市PM值
+	var myChart9 = echarts.init(document.getElementById('main9'));
+    myChart9.setOption(option9);
+
+    //驾驶车辆路线
+        //基本地图加载
+    var map = new AMap.Map("DriverMap", {
+        resizeEnable: true,
+        center: [116.397428, 39.90923],//地图中心点
+        zoom: 13 //地图显示的缩放级别
+    });
+    //构造路线导航类
+    var driving = new AMap.Driving({
+        map: map,
+        panel: "panel"
+    });
+    // 根据起终点名称规划驾车导航路线
+    driving.search([
+        {keyword: '绍兴文理学院',city:'绍兴'},
+        {keyword: '西湖',city:'杭州'}
+    ], function(status, result) {
+        // result 即是对应的驾车导航信息，相关数据结构文档请参考  https://lbs.amap.com/api/javascript-api/reference/route-search#m_DrivingResult
+        if (status === 'complete') {
+            {#log.success('绘制驾车路线完成')#}
+            console.log(result)
+        } else {
+            {#log.error('获取驾车数据失败：' + result)#}
+            console.log('获取驾车数据失败：' + result)
+        }
+    });
+	</script>
+</body>
+</html>

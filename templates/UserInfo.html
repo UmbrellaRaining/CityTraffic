@@ -1,0 +1,112 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>用户列表</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="{% static 'jQuery/jQuery.3.7.1.min.js' %}"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <style>
+        body {
+            position: relative;
+            height: 100vh; /* 设置为视口高度 */
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* 隐藏滚动条 */
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-image: url({% static 'images/future1.jpg' %});
+            background-size: cover;
+            background-position: center;
+            filter: blur(10px); /* 设置模糊度 */
+            z-index: -1; /* 确保模糊层在内容之下 */
+        }
+        .content {
+            position: relative;
+            z-index: 1; /* 确保内容在模糊层之上 */
+            color: #fff; /* 设置内容颜色 */
+            padding: 20px;
+        }
+        .bg-info {
+            color: #4d4d4c;
+        }
+
+        .glass-container{
+            width: 100%;
+            {#height: 30%;#}
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            background-color: rgba(0,191,255, 0.075);
+            box-shadow: rgba(0, 0, 0, 0.3) 2px 8px 8px;
+            border: 2px rgba(255,255,255,0.4) solid;
+            border-bottom: 2px rgba(40,40,40,0.35) solid;
+            border-right: 2px rgba(40,40,40,0.35) solid;
+        }
+        .top {
+            font-size: 30px;
+            padding: 10px 0 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid content">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-default glass-container">
+                    <div class="top">
+                        所有用户信息
+                    </div>
+                </div>
+                <!--
+                    列表展示
+                -->
+                <div class="table-responsive" style="border: #93a1a1 2px solid;
+                    border-radius: 15px;">
+                    <table class="table table-striped bg-info">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>姓名</th>
+                                <th>logo</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in name %}
+                                <tr>
+                                    <td>{{ item.id }}</td>
+                                    <td>{{ item.name }}</td>
+                                    <td><img src="{% static 'images/logo' %}{{ item.id }}.png" alt="Logo" style="width: 30px;height: 30px"></td>
+                                    <td>
+                                        <a href="/Delete/?nid={{ item.id }}">删除</a>
+                                    </td>
+                                    <td>
+                                        <a href="/Edit/{{ item.id }}">编辑</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

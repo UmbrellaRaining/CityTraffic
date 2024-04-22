@@ -1,0 +1,286 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<title>个人信息</title>
+    <script src="{% static 'js/love2.js' %}"></script>
+    <style>
+        *{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline;}
+        ul{list-style:none;}
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-image: url({% static 'images/future5.jpg' %});
+            background-size: cover;
+            background-position: center;
+            filter: blur(6px); /* 设置模糊度 */
+            z-index: -1; /* 确保模糊层在内容之下 */
+        }
+        h1 {
+            text-align: center;
+            font-size: 3em;
+            color: #3C2F24;
+            margin: 2em 0em 1em 0em;
+            font-family: '微软雅黑';
+        }
+        .edit {
+            margin:0% auto;/*外边距：上下0，左右水平居中*/
+            background: #fff;
+            margin-top: -20%;
+            box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+        }
+        /* ribbon style */
+        .h2 h2 {
+            color: #fff;
+            font-size: 1.2em;
+            padding: 7px 9px 5px 27px;
+            font-weight: 300;
+        }
+
+        ul.content {
+            width: 100%;
+            margin: 0 auto;
+            background: #ef8d32;
+            font-weight: 100;
+        }
+        a, a:visited {
+            color:#fff;
+        }
+        p{
+            padding:10px;
+            text-align:center;
+        }
+        .element {
+            width: 60%;
+            margin: 0 auto 7em;
+            padding: 2em;
+            display: flex;    /*设置该div为一个弹性盒容器*/
+            flex-flow: row;   /*子元素按横轴方向顺序排列*/
+        }
+        .element-left {
+            margin:0 1.5%;
+            flex: 3.3 ;     /*将容器分为10份，占三分之一*/
+            order: 1;      /*排序为第1个子元素*/
+        }
+        .element-right {
+            margin:0 1.5%;
+            flex: 3.3 ;     /*将容器分为10份，占三分之一*/
+            order:2;       /*排序为第2个子元素*/
+        }
+        .element-last {
+            margin:0 1.5%;
+            flex: 3.3 ;     /*将容器分为10份，占三分之一*/
+            order:3;        /*排序为第3个子元素*/
+        }
+        /*--teddy-bear--*/
+        .teddy-bear {
+            text-align: center;
+        }
+        .teddy-text {
+            background: #e1f5f5;
+            padding: 1em 1em;
+            height: 320px;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .teddy-text h4 {
+            color: #ee5a32;
+            font-size: 1.2em;
+            margin: 0.5em 0 0;
+        }
+        .teddy-text img {
+            border-radius: 70px;/*边框圆角半径为70px*/
+            width: 60%;
+            border-radius: 50px;
+            background: #e0e0e0;
+            box-shadow:  20px 20px 18px #bebebe,
+             -20px -20px 18px #ffffff;
+        }
+        .teddy-follow {
+            background: #ef8d32;
+            padding: 0.7em 0em 0.7em 0em;
+            border-radius: 0 0 15px 15px;
+        }
+        .element-bg-img img {
+            border-radius: 6px 6px 0px 0px;
+        }
+
+        .temperatur h2 {
+            color: #ee5a32;
+            font-size: 3.2em;
+            display: inline-block;
+            vertical-align: top;
+            font-family: 'Roboto', sans-serif;
+        }
+        .element {
+            width: 82%;
+            margin: 0 auto 6em;
+        }
+        form {
+            padding: 12% 4% 12% 4%;
+        }
+
+        @media(max-width:768px){
+            .element {
+                width: 80%;
+            }
+            input[type="text"] {
+                width: 60%;
+            }
+            .teddy-text h4 {
+                font-size: 1em;
+            }
+        }
+        @media (max-width: 667px){
+            input[type="text"] {
+                width: 70%;
+            }
+            form {
+                padding: 13% 6% 13% 6%;
+            }
+            .teddy-text h4 {
+                font-size: 0.92em;
+            }
+        }
+        @media (max-width: 640px){
+            .element{
+                margin: 0 auto 2em;
+                flex-flow: column; /*弹性盒中的子元素按纵轴方向排列*/
+            }
+            .element-left,.element-right,.element-last{
+                order: 0;/*将子元素都设置成同一个值，指按自然顺序排列*/
+                margin: 1%;
+            }
+            h1 {
+                font-size: 2em;
+                margin: 1em 0em 0.5em 0em;
+            }
+
+            form {
+                padding: 13% 13% 13% 13%;
+            }
+            input[type="text"] {
+                width: 85%;
+            }
+        }
+        @media (max-width: 600px){
+            input[type="text"] {
+                width: 80%;
+            }
+        }
+        @media (max-width: 568px){
+            input[type="text"] {
+                width: 70%;
+            }
+        }
+        .left {
+            width: 100%;
+            height: 380px;
+        }
+        .image {
+            width: 100%;
+            height: 100%;
+        }
+        .content {
+            width: 100%;
+            height: 300px;
+            margin-top: -20%;
+        }
+        .right {
+            width: 100%;
+            height: 380px;
+        }
+        .table-info {
+            background-color: silver;
+            border-radius: 15px 15px 0 0;
+        }
+        .shadow-inset-center {
+            -webkit-animation: shadow-inset-center 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+            animation: shadow-inset-center 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+        }
+
+        @-webkit-keyframes shadow-inset-center {
+          0% {
+            -webkit-box-shadow: inset 0 0 0 0 rgba(0, 0, 0, 0);
+                    box-shadow: inset 0 0 0 0 rgba(0, 0, 0, 0);
+          }
+          100% {
+            -webkit-box-shadow: inset 0 0 14px 0px rgba(0, 0, 0, 0.5);
+                    box-shadow: inset 0 0 14px 0px rgba(0, 0, 0, 0.5);
+          }
+        }
+        @keyframes shadow-inset-center {
+          0% {
+            -webkit-box-shadow: inset 0 0 0 0 rgba(0, 0, 0, 0);
+                    box-shadow: inset 0 0 0 0 rgba(0, 0, 0, 0);
+          }
+          100% {
+            -webkit-box-shadow: inset 0 0 14px 0px rgba(0, 0, 0, 0.5);
+                    box-shadow: inset 0 0 14px 0px rgba(0, 0, 0, 0.5);
+          }
+        }
+
+    </style>
+</head>
+<body>
+<h1>个人信息</h1>
+<div class="element">
+	<div class="element-left">
+		<div class="edit">
+{#			<div class="left"><img class="image" src="{% static 'images/' %}{{ info.name }}.jpg" alt=""></div>#}
+			<div class="left"><img class="image" src="{% static 'images/' %}{{ user.user_image }}" alt="{{ info.name }}"></div>
+			<div style="text-align: center; background-color: #ef8d32;height: 49%;padding: 0.7em 0em 0.7em 0em;">
+				<span>靓照</span>
+			</div>
+		</div>
+	</div>
+	<div class="element-right">
+		<div class="teddy-bear">
+			<div class="teddy-text">
+				<img src="{% static 'images/logo' %}{{ info.id }}.png" alt="" style="height: 55%;"  class="img-responsive">
+{#				<h4 name="name" style="margin-top: 10%;font-size: 30px">{{ info.name }}</h4>#}
+				<h4 name="name" style="margin-top: 10%;font-size: 30px">{{ user.user_name }}</h4>
+			</div>
+			<div class="teddy-follow">{{ user.user_say }}</div>
+		</div>
+	</div>
+	<div class="element-last">
+		<div class="container content right">
+            <table class="table tab-content table-info shadow-inset-center" style="width: 100%;height: 100%;font-size: 20px">
+                <tbody class="tbody">
+                    <tr>
+                        <td style="padding: 20px">
+                            <span>用户名:</span>
+                            <span>{{ info.name }}</span>
+                            <div class="clear"> </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px">
+                            <span>密码:</span>
+                            <span>{{ user.user_pwd }}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px">
+                            <span>邮箱:</span>
+                            <span>{{ user.user_email }}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="text-align: center; background-color: #ef8d32;padding: 0.7em 0em 0.7em 0em;border-radius: 0 0 15px 15px">
+				<span>个人资料</span>
+			</div>
+        </div>
+	</div>
+</div>
+<script src="../static/js/particle.js"></script>
+</body>
+</html>
